@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPI & Incentive Calculator</title>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            --btn-hover-gradient: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            --accent-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            padding: 30px 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .calculator-card {
+            position: relative;
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 580px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px -15px rgba(79, 70, 229, 0.15);
+            padding: 30px;
+            animation: fadeInDown 0.6s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        /* Profile Button Upper Right */
+        .profile-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            background: var(--primary-gradient);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .header-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 22px;
+            margin-top: 10px;
+        }
+
+        /* Budget Switcher Tabs */
+        .tab-container {
+            display: flex;
+            background: #e0e7ff;
+            padding: 6px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: #4338ca;
+            font-weight: 700;
+            font-size: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-gradient);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.35);
+            transform: scale(1.02);
+        }
+
+        .section-header {
+            font-size: 14px;
+            font-weight: 700;
+            color: #4f46e5;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header::after {
+            content: "";
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, #c7d2fe 0%, rgba(199, 210, 254, 0) 100%);
+        }
+
+        /* KPI Rows */
+        .kpi-row {
+            margin-bottom: 16px;
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #334155;
+            display: block;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--text-main);
+            outline: none;
+            background: #f8fafc;
+            transition: all 0.25s ease;
+        }
+
+        input[type="number"]:focus {
+            border-color: #6366f1;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Extra Inputs Grid (5 Fields) */
+        .extra-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .extra-field label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .calc-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .calc-btn:hover {
+            background: var(--btn-hover-gradient);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        .calc-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Results Styling with Animation */
+        .result-box {
+            margin-top: 26px;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 20px;
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .result-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--text-main);
+            text-align: center;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #475569;
+        }
+
+        .result-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 19px;
+            font-weight: 800;
+            color: #059669;
+            border-top: 2px dashed #cbd5e1;
+            padding-top: 14px;
+            margin-top: 12px;
+        }
+
+        /* Watermark */
+        .watermark {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .watermark a {
+            color: #818cf8;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .watermark a:hover {
+            color: #4f46e5;
+            text-decoration: underline;
+        }
+
+        /* Keyframe Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator-card">
+    <!-- Profile Button -->
+    <a href="https://rifatjr1208.github.io/digital-profile/" target="_blank" class="profile-btn">
+        <span>👤</span> Profile
+    </a>
+
+    <div class="header-title">KPI Calculation Panel</div>
+
+    <!-- Budget Switcher -->
+    <div class="tab-container">
+        <button type="button" class="tab-btn active" id="btn5500" onclick="setBudget(5500)">5,500 TK</button>
+        <button type="button" class="tab-btn" id="btn6000" onclick="setBudget(6000)">6,000 TK</button>
+    </div>
+
+    <form id="kpiForm">
+        <div class="section-header" id="budgetTitle">KPI Target & Achieve (Max 5,500 TK)</div>
+
+        <!-- KPI 1 -->
+        <div class="kpi-row">
+            <span class="kpi-label">KPI 1: Payment Volume (50%)</span>
+            <div class="input-group">
+                <input type="number" id="k1_target" placeholder="Target" step="any" required>
+                <input type="number" id="k1_achieve" placeholder="Achieve" step="any" required>
+            </div>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="kpi-row">
+            <span class="kpi-label">KPI 2: Active Merchant (25%)</span>
+            <div class="input-group">
+                <input type="number" id="k2_target" placeholder="Target" step="any" required>
+                <input type="number" id="k2_achieve" placeholder="Achieve" step="any" required>
+            </div>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="kpi-row">
+            <span class="kpi-label">KPI 3: Paybill (10%)</span>
+            <div class="input-group">
+                <input type="number" id="k3_target" placeholder="Target" step="any" required>
+                <input type="number" id="k3_achieve" placeholder="Achieve" step="any" required>
+            </div>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="kpi-row">
+            <span class="kpi-label">KPI 4: Acquisition (15%)</span>
+            <div class="input-group">
+                <input type="number" id="k4_target" placeholder="Target" step="any" required>
+                <input type="number" id="k4_achieve" placeholder="Achieve" step="any" required>
+            </div>
+        </div>
+
+        <div class="section-header">Extra Options (Optional)</div>
+
+        <div class="extra-grid">
+            <div class="extra-field">
+                <label for="basic">Basic Amount</label>
+                <input type="number" id="basic" placeholder="Amount" step="any">
+            </div>
+            <div class="extra-field">
+                <label for="acq_bonus">Acq Bonus</label>
+                <input type="number" id="acq_bonus" placeholder="Amount" step="any">
+            </div>
+            <div class="extra-field">
+                <label for="mau">10 MAU Amount</label>
+                <input type="number" id="mau" placeholder="Amount" step="any">
+            </div>
+            <div class="extra-field">
+                <label for="tada">TA/DA Amount</label>
+                <input type="number" id="tada" placeholder="Amount" step="any">
+            </div>
+            <div class="extra-field">
+                <label for="others">Others Amount</label>
+                <input type="number" id="others" placeholder="Amount" step="any">
+            </div>
+        </div>
+
+        <button type="submit" class="calc-btn">Calculate Final Result</button>
+    </form>
+
+    <!-- Results Display -->
+    <div id="resultBox" class="result-box">
+        <div class="result-title">Summary Breakdown</div>
+        <div class="result-item">
+            <span>KPI Earnings:</span>
+            <strong id="res_kpi">0 TK</strong>
+        </div>
+        <div class="result-item">
+            <span>Basic:</span>
+            <span id="res_basic">0 TK</span>
+        </div>
+        <div class="result-item">
+            <span>Acq Bonus:</span>
+            <span id="res_acq">0 TK</span>
+        </div>
+        <div class="result-item">
+            <span>10 MAU Amount:</span>
+            <span id="res_mau">0 TK</span>
+        </div>
+        <div class="result-item">
+            <span>TA/DA Amount:</span>
+            <span id="res_tada">0 TK</span>
+        </div>
+        <div class="result-item">
+            <span>Others:</span>
+            <span id="res_others">0 TK</span>
+        </div>
+        <div class="result-total">
+            <span>Total Payable:</span>
+            <span id="res_total">0 TK</span>
+        </div>
+    </div>
+</div>
+
+<!-- Watermark with Profile Link -->
+<div class="watermark">
+    ⚡ Powered by <a href="https://rifatjr1208.github.io/digital-profile/" target="_blank">Rifu ❤️‍🩹</a>
+</div>
+
+<script>
+    let currentBudget = 5500;
+
+    function setBudget(budget) {
+        currentBudget = budget;
+        
+        // Update UI Tabs
+        document.getElementById('btn5500').classList.toggle('active', budget === 5500);
+        document.getElementById('btn6000').classList.toggle('active', budget === 6000);
+        
+        // Update Header
+        document.getElementById('budgetTitle').innerText = `KPI Target & Achieve (Max ${budget.toLocaleString()} TK)`;
+    }
+
+    document.getElementById('kpiForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const weights = [0.50, 0.25, 0.10, 0.15];
+
+        // Fetch Required Inputs
+        const k1_t = parseFloat(document.getElementById('k1_target').value);
+        const k1_a = parseFloat(document.getElementById('k1_achieve').value);
+        
+        const k2_t = parseFloat(document.getElementById('k2_target').value);
+        const k2_a = parseFloat(document.getElementById('k2_achieve').value);
+        
+        const k3_t = parseFloat(document.getElementById('k3_target').value);
+        const k3_a = parseFloat(document.getElementById('k3_achieve').value);
+        
+        const k4_t = parseFloat(document.getElementById('k4_target').value);
+        const k4_a = parseFloat(document.getElementById('k4_achieve').value);
+
+        // Fetch Optional Inputs (5 Fields)
+        const basic = parseFloat(document.getElementById('basic').value) || 0;
+        const acqBonus = parseFloat(document.getElementById('acq_bonus').value) || 0;
+        const mau = parseFloat(document.getElementById('mau').value) || 0;
+        const tada = parseFloat(document.getElementById('tada').value) || 0;
+        const others = parseFloat(document.getElementById('others').value) || 0;
+
+        // Uncapped Math Logic for each KPI
+        const kpi1 = (k1_a / k1_t) * (currentBudget * weights[0]);
+        const kpi2 = (k2_a / k2_t) * (currentBudget * weights[1]);
+        const kpi3 = (k3_a / k3_t) * (currentBudget * weights[2]);
+        const kpi4 = (k4_a / k4_t) * (currentBudget * weights[3]);
+
+        const exactKpiTotal = kpi1 + kpi2 + kpi3 + kpi4;
+        
+        // Total KPI capped at maximum budget limit
+        const cappedKpiTotal = Math.min(exactKpiTotal, currentBudget);
+        const roundedKpiTotal = Math.round(cappedKpiTotal);
+
+        // Grand Total including all 5 optional inputs
+        const grandTotal = roundedKpiTotal + basic + acqBonus + mau + tada + others;
+
+        // Show Results
+        document.getElementById('res_kpi').innerText = `${roundedKpiTotal.toLocaleString()} TK (${exactKpiTotal.toFixed(2)})`;
+        document.getElementById('res_basic').innerText = `${basic.toLocaleString()} TK`;
+        document.getElementById('res_acq').innerText = `${acqBonus.toLocaleString()} TK`;
+        document.getElementById('res_mau').innerText = `${mau.toLocaleString()} TK`;
+        document.getElementById('res_tada').innerText = `${tada.toLocaleString()} TK`;
+        document.getElementById('res_others').innerText = `${others.toLocaleString()} TK`;
+        document.getElementById('res_total').innerText = `${grandTotal.toLocaleString()} TK`;
+
+        const resultBox = document.getElementById('resultBox');
+        resultBox.style.display = 'block';
+    });
+</script>
+
+</body>
+</html>
